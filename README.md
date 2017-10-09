@@ -8,7 +8,7 @@ Heat Orchestration Template (HOT) which can be deployed by [Heat](https://docs.o
 
 
 ## Architecture
-SFHEAT project takes a set of Superfluity descriptors as an input, calls an appropriate parser, 
+SFHEAT project takes a set of Superfluity descriptors as an input(YAML or JSON), calls an appropriate parser, 
 maps it to Heat resources and then produces a Heat Orchestration Template (HOT) as an output.
 
 ## How to Install
