@@ -92,4 +92,4 @@ if __name__ == '__main__':
     xargs = ['quiet', 'verbose', 'files_extension']
     args = {arg: v for arg, v in vars(args).items() if arg not in xargs}
     sfheat = Sfheat(**args)
-
+    sfheat.translate()
