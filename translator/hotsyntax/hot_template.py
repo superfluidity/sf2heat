@@ -16,6 +16,7 @@ class HotTemplate(object):
         log.debug('Initialized HotTemplate')
 
     def add_resource(self, res_id, new_resource):
+        log.debug('Add new resource '+ res_id)
         self.resources[res_id] = new_resource
 
     def add_parameter(self, param_id, new_parameter):
