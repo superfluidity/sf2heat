@@ -9,6 +9,7 @@ log = logging.getLogger('HotTemplate')
 class HotTemplate(object):
     """ Representation of a HOT template"""
     def __init__(self):
+        self.heat_template_version = '2017-02-24'
         self.resources = {}
         self.outputs = {}
         self.parameters = {}
@@ -26,5 +27,5 @@ class HotTemplate(object):
         self.description = description
 
     def yaml(self):
-        return yaml.dump(self.__dict__, None, encoding='utf-8', allow_unicode=False )
+        return yaml.dump(self.__dict__, None, encoding='utf-8', allow_unicode=False)
 
