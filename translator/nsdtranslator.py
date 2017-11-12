@@ -1,6 +1,4 @@
 import logging
-import yaml
-import json
 
 from hotsyntax.hot_template import HotTemplate
 from hotsyntax.hot_resource import HotResource
@@ -31,9 +29,6 @@ class NSDTranslator(object):
         for vdu in vnf_data['vdu']:
             self._translate_vdu(vdu, vnf_data)
 
-        for extCpd in vnf_data['vnfExtCpd']:
-            self._translate_vnfExtCpd(extCpd, vnf_data)
-
     def _translate_vdu(self, vdu_data, vnf_data):
         log.debug('_translate_vdu id: %s', vdu_data['vduId'])
         resource_type = self._infer_resource_type(vdu_data['vduId'], vnf_data)
@@ -48,10 +43,10 @@ class NSDTranslator(object):
         resource_type = self._infer_resource_type(extCpd['cpdId'], vnf_data)
         log.debug('Resource type: %s', resource_type)
         new_hot_resource = self._get_neutron_provider_net(extCpd['cpdId'], vnf_data)
-        self.hot_template.add_resource(extCpd['cpdId'], new_hot_resource)
+        return new_hot_resource
 
-
-    def _infer_resource_type(self, element_id, vnf_data):
+    @staticmethod
+    def _infer_resource_type(element_id, vnf_data):
         log.debug('_infer_resource_type from: %s', element_id)
         try:
             vnf_metadata = vnf_data['modifiableAttributes']['metadata']
@@ -108,8 +103,7 @@ class NSDTranslator(object):
 
     def _get_neutron_router_interface(self, router_id, intcpd, vnf_data):
         resource_type = 'OS::Neutron::RouterInterface'
-        resource_prop = {}
-        resource_prop['router'] = {'get_resource': router_id}
+        resource_prop = {'router': {'get_resource': router_id}}
         neutron_port_name = 'port_' + intcpd['cpdId']
         neutron_port_res = self._get_neutron_port(intcpd, vnf_data)
         self.hot_template.add_resource(neutron_port_name, neutron_port_res)
@@ -122,10 +116,14 @@ class NSDTranslator(object):
         resource_prop = {}
         name = intcpd['cpdId']
         network_name = name
-        resource_prop['network'] = {'get_resource': network_name}
-        neutron_net = self._get_neutron_net(network_name, vnf_data)
-        self.hot_template.add_resource(network_name, neutron_net)
 
+        extCpd = self._isIntCpd_conn_extCpd(intcpd, vnf_data)
+        if extCpd:
+            neutron_elem = self._translate_vnfExtCpd(extCpd, vnf_data)
+        else:
+            neutron_elem = self._get_neutron_net(network_name, vnf_data)
+        self.hot_template.add_resource(network_name, neutron_elem)
+        resource_prop['network'] = {'get_resource': network_name}
         metadata_list = vnf_data['modifiableAttributes']['metadata']
         for metadata in metadata_list:
             if 'CPIPv4FixedIP' in metadata:
@@ -135,7 +133,7 @@ class NSDTranslator(object):
                             resource_prop['fixed_ips'] = []
                         resource_prop['fixed_ips'].append({'ip_address': fixed_ip[name]})
                         subnet_name = name + str(len(resource_prop['fixed_ips']))
-                        self._get_port_subnet(subnet_name, network_name, vnf_data )
+                        self._get_port_subnet(subnet_name, network_name, vnf_data)
             if 'properties' in metadata:
                 for prop in metadata['properties']:
                     if name in prop:
@@ -200,3 +198,11 @@ class NSDTranslator(object):
                         meta_prop = dict(pair for d in prop[element_id] for pair in d.items())
                         return meta_prop
         return {}
+
+    @staticmethod
+    def _isIntCpd_conn_extCpd(intcpd, vnf_data):
+        intVirtualLinkDesc = intcpd['intVirtualLinkDesc']
+        for extCpd in vnf_data['vnfExtCpd']:
+            if extCpd['intVirtualLinkDesc'] == intVirtualLinkDesc:
+                return extCpd
+        return None
