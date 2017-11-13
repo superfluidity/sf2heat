@@ -42,7 +42,7 @@ class NSDTranslator(object):
         log.debug('_translate_vnfExtCpd id: %s', extCpd['cpdId'])
         resource_type = self._infer_resource_type(extCpd['cpdId'], vnf_data)
         log.debug('Resource type: %s', resource_type)
-        new_hot_resource = self._get_neutron_provider_net(extCpd['cpdId'], vnf_data)
+        new_hot_resource = self._get_neutron_provider_net(extCpd, vnf_data)
         return new_hot_resource
 
     @staticmethod
@@ -115,7 +115,7 @@ class NSDTranslator(object):
         resource_type = 'OS::Neutron::Port'
         resource_prop = {}
         name = intcpd['cpdId']
-        network_name = name
+        network_name = intcpd['intVirtualLinkDesc']
 
         extCpd = self._isIntCpd_conn_extCpd(intcpd, vnf_data)
         if extCpd:
@@ -180,12 +180,12 @@ class NSDTranslator(object):
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
 
-    def _get_neutron_provider_net(self, name, vnf_data):
+    def _get_neutron_provider_net(self, ext_cpd, vnf_data):
         resource_type = 'OS::Neutron::ProviderNet'
-        resource_prop = {'name': name}
-        meta_pro = self._get_properties_from_metadata(name, 'properties', vnf_data)
+        resource_prop = {'name': ext_cpd['intVirtualLinkDesc']}
+        meta_pro = self._get_properties_from_metadata(ext_cpd['cpdId'], 'properties', vnf_data)
         resource_prop.update(meta_pro)
-        new_hot_resource = HotResource(name, resource_type, resource_prop)
+        new_hot_resource = HotResource(ext_cpd['intVirtualLinkDesc'], resource_type, resource_prop)
         return new_hot_resource
 
     @staticmethod
