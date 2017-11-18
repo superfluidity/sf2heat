@@ -1,9 +1,9 @@
 from distutils.core import setup
 
 setup(
-    name='sfheat',
+    name='sf2heat',
     version='0.1',
-    packages=['translator'],
+    packages=['sf2heat', 'sf2heat/hotsyntax'],
     url='',
     license='',
     author='Francesco Lombardo',

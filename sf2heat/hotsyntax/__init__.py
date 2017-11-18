@@ -1,0 +1,1 @@
+__all__ = ["hot_resource", "hot_template"]
