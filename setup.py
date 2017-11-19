@@ -8,5 +8,5 @@ setup(
     license='',
     author='Francesco Lombardo',
     author_email='franclombardo@gmail.com',
-    description='SuperFluidity HEAt Transaltor'
+    description='SuperFluidity 2 HEAt Transaltor'
 )

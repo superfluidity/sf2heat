@@ -38,7 +38,7 @@ class Sfheat:
 
     def translate(self):
         log.debug("Starts translation process...")
-        nsd_translator = NSDTranslator(self.input_data)
+        nsd_translator = NSDTranslator(self.input_data, self.output_file)
         nsd_translator.translate()
         return
 

@@ -1,7 +1,8 @@
 import logging
-
+import yaml
 from hotsyntax.hot_template import HotTemplate
 from hotsyntax.hot_resource import HotResource
+import os
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger('NSDTranslator')
@@ -20,9 +21,14 @@ class NSDTranslator(object):
     def translate(self):
         for vnfd_id in self.nsd_descriptors['vnfd']:
             self._translate_vnf(self.nsd_descriptors['vnfd'][vnfd_id])
-        # print self.hot_template.json()
-        yml_template = self.hot_template.yaml()
-        print yml_template
+
+        if self.output_dir is not None:
+            if isinstance(self.output_dir, str):
+                self.makedir_p(self.output_dir)
+            dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
+            yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
+        else:
+            print yaml.dump(self.hot_template, default_flow_style=False, explicit_start=True)
 
     def _translate_vnf(self, vnf_data):
         log.debug('_translate_vnf id: ' + vnf_data['vnfdId'])
@@ -133,7 +139,7 @@ class NSDTranslator(object):
                         if 'fixed_ips' not in resource_prop:
                             resource_prop['fixed_ips'] = []
                         resource_prop['fixed_ips'].append({'ip_address': fixed_ip[name]})
-                        print "SUBNET per cpid:", name, network_name
+                        print "SUBNET for cpid:", name, network_name
                         subnet_name = 'subnet_' + name + '_' + str(index)
                         #neutron_subnet = self._get_port_subnet(subnet_name, intcpd, vnf_data)
                         #self.hot_template.add_resource(subnet_name, neutron_subnet)
@@ -186,13 +192,10 @@ class NSDTranslator(object):
         return new_hot_resource
 
     def _get_port_subnet(self, subnet_name, intcpd, vnf_data):
-        print "NEW SUBNET", subnet_name, intcpd['cpdId']
-        #name = intcpd['cpdId']
         network_name = intcpd['intVirtualLinkDesc']
         resource_type = 'OS::Neutron::Subnet'
         resource_prop = {'name': subnet_name, 'network': {'get_resource': network_name}}
         meta_cidr = self._get_properties_from_metadata(intcpd['cpdId'], 'CPIPv4CIDR', vnf_data)
-        print "----------------", meta_cidr
         if 'CPIPv4CIDR' in meta_cidr:
             resource_prop['cidr'] = meta_cidr['CPIPv4CIDR']
         new_hot_resource = HotResource(subnet_name, resource_type, resource_prop)
@@ -214,14 +217,11 @@ class NSDTranslator(object):
 
     @staticmethod
     def _get_properties_from_metadata(element_id, meta_name, vnf_data):
-        print element_id, meta_name
         metadata_list = vnf_data['modifiableAttributes']['metadata']
         for metadata in metadata_list:
             if meta_name in metadata:
                 for prop in metadata[meta_name]:
-                    print "prop", prop
                     if element_id in prop:
-                        print "-------------------- TROVATA", type(prop[element_id]), meta_name
                         if isinstance(prop[element_id], list):
                             meta_prop = dict(pair for d in prop[element_id] for pair in d.items())
                             return meta_prop
@@ -236,3 +236,13 @@ class NSDTranslator(object):
             if extCpd['intVirtualLinkDesc'] == intVirtualLinkDesc:
                 return extCpd
         return None
+
+    @staticmethod
+    def makedir_p(directory):
+        """makedir_p(path)
+
+        Works like mkdirs, except that check if the leaf exist.
+
+        """
+        if not os.path.isdir(directory):
+            os.makedirs(directory)
