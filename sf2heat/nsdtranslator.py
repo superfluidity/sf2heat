@@ -21,10 +21,7 @@ class NSDTranslator(object):
     def translate(self):
         for vnfd_id in self.nsd_descriptors['vnfd']:
             self._translate_vnf(self.nsd_descriptors['vnfd'][vnfd_id])
-
         if self.output_dir is not None:
-            if isinstance(self.output_dir, str):
-                self.makedir_p(self.output_dir)
             dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
             yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
         else:
@@ -34,6 +31,8 @@ class NSDTranslator(object):
         log.debug('_translate_vnf id: ' + vnf_data['vnfdId'])
         for vdu in vnf_data['vdu']:
             self._translate_vdu(vdu, vnf_data)
+        for intVl in vnf_data['intVirtualLinkDesc']:
+            self._translate_intVl(intVl, vnf_data)
 
     def _translate_vdu(self, vdu_data, vnf_data):
         log.debug('_translate_vdu id: %s', vdu_data['vduId'])
@@ -50,6 +49,20 @@ class NSDTranslator(object):
         log.debug('Resource type: %s', resource_type)
         new_hot_resource = self._get_neutron_provider_net(extCpd, vnf_data)
         return new_hot_resource
+
+    def _translate_intVl(self, intVl, vnf_data):
+        log.debug('_translate_intVl id: %s', intVl['virtualLinkDescId'])
+        # find and get properties for subnet
+        metadata_list = vnf_data['modifiableAttributes']['metadata']
+        for metadata in metadata_list:
+            if 'CPIPv4CIDR' in metadata:
+                for prop in metadata['CPIPv4CIDR']:
+                    if intVl['virtualLinkDescId'] in prop:
+                        for k, cidr in enumerate(prop[intVl['virtualLinkDescId']]):
+                            subnet_name = 'subnet_'+intVl['virtualLinkDescId']+'_' + str(k)
+                            sub_pro = {'cidr': cidr['cidr'], 'network': subnet_name}
+                            neutron_subnet = self._get_subnet(subnet_name, sub_pro, vnf_data)
+                            self.hot_template.add_resource(subnet_name, neutron_subnet)
 
     @staticmethod
     def _infer_resource_type(element_id, vnf_data):
@@ -139,7 +152,7 @@ class NSDTranslator(object):
                         if 'fixed_ips' not in resource_prop:
                             resource_prop['fixed_ips'] = []
                         resource_prop['fixed_ips'].append({'ip_address': fixed_ip[name]})
-                        print "SUBNET for cpid:", name, network_name
+                        #print "SUBNET for cpid:", name, network_name
                         subnet_name = 'subnet_' + name + '_' + str(index)
                         #neutron_subnet = self._get_port_subnet(subnet_name, intcpd, vnf_data)
                         #self.hot_template.add_resource(subnet_name, neutron_subnet)
@@ -191,13 +204,9 @@ class NSDTranslator(object):
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
 
-    def _get_port_subnet(self, subnet_name, intcpd, vnf_data):
-        network_name = intcpd['intVirtualLinkDesc']
+    def _get_subnet(self, subnet_name, prop, vnf_data):
         resource_type = 'OS::Neutron::Subnet'
-        resource_prop = {'name': subnet_name, 'network': {'get_resource': network_name}}
-        meta_cidr = self._get_properties_from_metadata(intcpd['cpdId'], 'CPIPv4CIDR', vnf_data)
-        if 'CPIPv4CIDR' in meta_cidr:
-            resource_prop['cidr'] = meta_cidr['CPIPv4CIDR']
+        resource_prop = {'name': subnet_name, 'network': {'get_resource': prop['network']}, 'cidr': prop['cidr']}
         new_hot_resource = HotResource(subnet_name, resource_type, resource_prop)
         return new_hot_resource
 
