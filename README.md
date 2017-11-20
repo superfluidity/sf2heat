@@ -1,4 +1,4 @@
-# SFHEAT (SuperFluidity HEAt Translator)
+# SF2HEAT (SuperFluidity HEAt Translator)
 
 
 ## Overview
@@ -22,8 +22,9 @@ Install from source code:
 
 Install with pip:
 
+    pip install -e https://github.com/superfluidity/sfehat.git
 
-## Documentation & publications
+## Documentation
 
 
 ## Project Info

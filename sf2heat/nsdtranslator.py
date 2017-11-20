@@ -60,7 +60,7 @@ class NSDTranslator(object):
                     if intVl['virtualLinkDescId'] in prop:
                         for k, cidr in enumerate(prop[intVl['virtualLinkDescId']]):
                             subnet_name = 'subnet_'+intVl['virtualLinkDescId']+'_' + str(k)
-                            sub_pro = {'cidr': cidr['cidr'], 'network': subnet_name}
+                            sub_pro = {'cidr': cidr['cidr'], 'network': intVl['virtualLinkDescId']}
                             neutron_subnet = self._get_subnet(subnet_name, sub_pro, vnf_data)
                             self.hot_template.add_resource(subnet_name, neutron_subnet)
 
