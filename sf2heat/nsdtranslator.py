@@ -186,11 +186,18 @@ class NSDTranslator(object):
     def _get_nova_flavor(self, name, vdu_data, vnf_data):
         resource_type = 'OS::Nova::Flavor'
         resource_prop = {'flavorid': vnf_data['deploymentFlavour'][0]['flavourId'], 'name': name, 'is_public': False}
-        # FIXME trovare valori proprieta' seguenti
-        resource_prop['disk'] = 40
-        resource_prop['ram'] = 8192
-        resource_prop['swap'] = 0
-        resource_prop['vcusp'] = 4
+        # virtualMemory and virtualCpu properties
+        if 'virtualComputeDesc' in vdu_data and vdu_data['virtualComputeDesc'] is not None:
+            for vcd in vnf_data['virtualComputeDesc']:
+                if vcd['virtualComputeDescId'] == vdu_data['virtualComputeDesc']:
+                    resource_prop['ram'] = vcd['virtualMemory']['virtualMemSize']
+                    resource_prop['vcusp'] = vcd['virtualCpu']['numVirtualCpu']
+        # virtualStorageDesc
+        if 'virtualStorageDesc' in vdu_data and vdu_data['virtualStorageDesc'] is not None:
+            for vsd in vnf_data['virtualStorageDesc']:
+                if vsd['id'] == vdu_data['virtualStorageDesc']:
+                    resource_prop['disk'] = vsd['sizeOfStorage']
+                    resource_prop['swap'] = 0
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
 

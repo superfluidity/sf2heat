@@ -307,7 +307,7 @@
 			"bootOrder": [],
 			"description": "",
 			"vduId": "vnf_vdu_tof",
-			"virtualStorageDesc": "id",
+			"virtualStorageDesc": "routerTofVsDesc",
 			"vduParentMandatory": false,
 			"vduNestedDesc": null,
 			"swImageDesc": {
@@ -676,7 +676,7 @@
         }
       ],
       "virtualMemory": {
-        "virtualMemSize": 1,
+        "virtualMemSize": 2048,
         "virtualMemOversubscriptionPolicy": "",
         "numaEnabled": false
       },
@@ -697,7 +697,7 @@
 			"rdmaEnabled": false,
 			"sizeOfStorage": 100,
 			"typeOfStorage": "volume",
-			"id": "id",
+			"id": "routerTofVsDesc",
 			"swImageDesc": "reference SwImageDesc"
 		}
 	],
