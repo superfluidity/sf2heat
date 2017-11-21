@@ -191,7 +191,7 @@ class NSDTranslator(object):
             for vcd in vnf_data['virtualComputeDesc']:
                 if vcd['virtualComputeDescId'] == vdu_data['virtualComputeDesc']:
                     resource_prop['ram'] = vcd['virtualMemory']['virtualMemSize']
-                    resource_prop['vcusp'] = vcd['virtualCpu']['numVirtualCpu']
+                    resource_prop['vcpus'] = vcd['virtualCpu']['numVirtualCpu']
         # virtualStorageDesc
         if 'virtualStorageDesc' in vdu_data and vdu_data['virtualStorageDesc'] is not None:
             for vsd in vnf_data['virtualStorageDesc']:
