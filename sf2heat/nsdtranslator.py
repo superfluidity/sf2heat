@@ -1,20 +1,25 @@
 import logging
 import yaml
+import os
+import shutil
+
 from hotsyntax.hot_template import HotTemplate
 from hotsyntax.hot_resource import HotResource
-import os
 
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger('NSDTranslator')
+
+TEMPLATE_ANSIBLE_PATH = 'sf2heat/templates/ansible'
 
 
 class NSDTranslator(object):
     """ Invokes translation methods. """
 
-    def __init__(self, nsd_data, output_dir=None):
+    def __init__(self, nsd_data, output_dir=None, ansible=False):
         super(NSDTranslator, self).__init__()
         self.nsd_descriptors = nsd_data
         self.output_dir = output_dir
+        self.ansbile = ansible
         self.hot_template = HotTemplate()
         log.debug('Initialized NSDTranslator')
 
@@ -22,8 +27,11 @@ class NSDTranslator(object):
         for vnfd_id in self.nsd_descriptors['vnfd']:
             self._translate_vnf(self.nsd_descriptors['vnfd'][vnfd_id])
         if self.output_dir is not None:
-            dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
-            yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
+            if self.ansbile:
+                self._write_ansible_playbook(self.hot_template)
+            else:
+                dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
+                yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
         else:
             print yaml.dump(self.hot_template, default_flow_style=False, explicit_start=True)
 
@@ -262,3 +270,11 @@ class NSDTranslator(object):
         """
         if not os.path.isdir(directory):
             os.makedirs(directory)
+
+    def _write_ansible_playbook(self, hot):
+        log.debug('Write Ansible playbook to %s', self.output_dir)
+        shutil.rmtree(self.output_dir,ignore_errors=True)
+        shutil.copytree(TEMPLATE_ANSIBLE_PATH, self.output_dir)
+        dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
+        yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
+

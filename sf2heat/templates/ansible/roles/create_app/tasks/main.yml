@@ -1,0 +1,9 @@
+---
+- name: Copy heat template
+  template:
+    src: stack.j2
+    dest: "{{ template_path }}"
+
+
+- name: Create new osm stack
+  command: openstack --os-cloud superfluidity stack create -t {{ template_path }} osm

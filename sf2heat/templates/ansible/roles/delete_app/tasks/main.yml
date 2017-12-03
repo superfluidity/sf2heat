@@ -1,0 +1,4 @@
+---
+
+- name: Delete osm stack
+  command: openstack --os-cloud superfluidity stack delete -y osm

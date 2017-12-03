@@ -15,14 +15,15 @@ maps it to Heat resources and then produces a Heat Orchestration Template (HOT) 
 
 Install from source code:
 
+### Clone from GitHub repository
     git clone https://github.com/superfluidity/sfehat.git
     cd sfehat
-    python setup.py build
-    sudo python setup.py install
+### Install inside python environment    
+    python setup.py install
 
 Install with pip:
 
-    pip install -e https://github.com/superfluidity/sfehat.git
+    pip install -e https://github.com/superfluidity/sfehat.git#egg=sf2heat
 
 ## Documentation
 

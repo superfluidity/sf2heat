@@ -4,9 +4,9 @@ import logging
 import os
 import shutil
 import sys
-from sfheat import Sfheat
+from sf2heat import Sf2heat
 
-DESCRIPTION = '''SFHEAT CLI takes a set of Superfluity descriptors as an input(YAML or JSON), calls an appropriate parser, 
+DESCRIPTION = '''Sf2heat CLI takes a set of Superfluity descriptors as an input(YAML or JSON), calls an appropriate parser, 
 maps it to Heat resources and then produces a Heat Orchestration Template (HOT) as an output.
 This requires that you have Python 2.7.
 '''
@@ -29,7 +29,7 @@ def init_logger(logger_name):
 
 def parse_args(args=None):
     parser = argparse.ArgumentParser(
-        description=DESCRIPTION, formatter_class=argparse.RawTextHelpFormatter, prog='SFHEAT CLI')
+        description=DESCRIPTION, formatter_class=argparse.RawTextHelpFormatter, prog='SF2HEAT CLI')
     verb_group = parser.add_mutually_exclusive_group()
     verb_group.add_argument('-v', '--verbose', action='store_true',
                                help='Verbose level logging to shell.')
@@ -58,6 +58,12 @@ def parse_args(args=None):
                         default=sys.stdout,
                         choices=Choices('.yaml'),
                         help='the file where the HOT should be written')
+    parser.add_argument('-d', '--output-directory',
+                        #type=readable_dir,
+                        help='the directory where the Ansible playbook with HOT should be written')
+    parser.add_argument('-a', '--ansible-init',
+                        action='store_true',
+                        help='Generate the HOT template with an Ansible playbook Cloud init')
     parser.add_argument('--parameters',
                         metavar='<param1=val1;param2=val2;...>',
                         help='Optional input parameters.')
@@ -91,5 +97,5 @@ if __name__ == '__main__':
 
     xargs = ['quiet', 'verbose', 'files_extension']
     args = {arg: v for arg, v in vars(args).items() if arg not in xargs}
-    sfheat = Sfheat(**args)
-    sfheat.translate()
+    sf2heat = Sf2heat(**args)
+    sf2heat.translate()

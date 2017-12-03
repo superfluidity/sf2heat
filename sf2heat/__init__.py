@@ -1,1 +1,1 @@
-__all__ = ["cli", "sfheat"]
+__all__ = ["cli", "sf2heat"]
