@@ -4,6 +4,10 @@
     src: stack.j2
     dest: "{{ template_path }}"
 
+- name: Copy config template
+  template:
+    src: config.j2
+    dest: "{{ config_path }}"
 
-- name: Create new osm stack
-  command: openstack --os-cloud superfluidity stack create -t {{ template_path }} osm
+- name: Create new app stack
+  command: openstack --os-cloud {{ cloud_config_name }} stack create -t {{ template_path }} {{ app_name }}

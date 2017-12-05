@@ -1,4 +1,4 @@
 ---
 
-- name: Delete osm stack
-  command: openstack --os-cloud superfluidity stack delete -y osm
+- name: Delete app stack
+  command: openstack --os-cloud {{ cloud_config_name }} stack delete -y {{ app_name }}

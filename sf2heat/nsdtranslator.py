@@ -20,6 +20,13 @@ class NSDTranslator(object):
         self.nsd_descriptors = nsd_data
         self.output_dir = output_dir
         self.ansbile = ansible
+        self.ansbile_vars = {
+            "template_path" : "/tmp/app_template.yaml",
+            #"config_path": "/tmp/app_config.yaml",
+            "app_name": "test_app",
+            "cloud_config_name": "cloud_config_name"
+        }
+        self.ansbile_configs = []
         self.hot_template = HotTemplate()
         log.debug('Initialized NSDTranslator')
 
@@ -93,6 +100,15 @@ class NSDTranslator(object):
         if resource_type == 'OS::Nova::Server':
             vdu_sw_img_dsc = vdu_data['swImageDesc']
             result['image'] = vdu_sw_img_dsc['swImage']
+            user_data_ref = self._get_properties_from_vdu_add_prop('user_data', vdu_data)
+            if user_data_ref:
+                #"config_path": "/tmp/app_config.yaml"
+                config_path = "/tmp/"+user_data_ref
+                var_name = 'config_path_' + str(len(self.ansbile_configs))
+                self.ansbile_vars[var_name] = str(config_path)
+                self.ansbile_configs.append({"name": user_data_ref, "var_name": var_name})
+                result['user_data'] = {"get_file": config_path}
+            result['user_data_format'] = "RAW"
             # OS::Nova::Flavor
             flavor_name = 'flavor_' + vdu_data['vduId']
             result['flavor'] = {'get_resource': flavor_name}
@@ -254,6 +270,13 @@ class NSDTranslator(object):
         return {}
 
     @staticmethod
+    def _get_properties_from_vdu_add_prop(prop_name, vdu_data):
+        for prop in vdu_data['configurableProperties']['additionalVnfcConfigurableProperty']:
+            if prop_name in prop:
+                return prop[prop_name]
+        return
+
+    @staticmethod
     def _isIntCpd_conn_extCpd(intcpd, vnf_data):
         intVirtualLinkDesc = intcpd['intVirtualLinkDesc']
         for extCpd in vnf_data['vnfExtCpd']:
@@ -273,8 +296,38 @@ class NSDTranslator(object):
 
     def _write_ansible_playbook(self, hot):
         log.debug('Write Ansible playbook to %s', self.output_dir)
+        create_task = [
+            {"name": "Copy heat template", "template": {"src": "stack.j2", "dst": "{{ template_path }}"}}
+        ]
+
+        # copy playbook dir tree
         shutil.rmtree(self.output_dir,ignore_errors=True)
         shutil.copytree(TEMPLATE_ANSIBLE_PATH, self.output_dir)
-        dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
+
+        # dump heat template in create_app/templates
+        heat_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', 'stack.j2')
+        dstfile = open(heat_path, 'w')
         yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
+
+        # dump each config script
+        for conf in self.ansbile_configs:
+            print conf
+            conf_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', conf['name'])
+            conf_file = open(conf_path, 'w')
+            conf_file.write(self.nsd_descriptors['resource'][conf['name']])
+            conf_file.close()
+            create_task.append({"name": "Copy config template", "template": {"src": str(conf['name']), "dst": "{{ "+conf['var_name']+" }}"}})
+
+        # dump variables ansbile_vars
+        vars_path = os.path.join(self.output_dir, 'group_vars', 'all.yml')
+        vars_file = open(vars_path, 'w')
+        yaml.dump(self.ansbile_vars, vars_file, default_flow_style=False, explicit_start=True)
+
+        create_task.append({"name": "Create new stack",
+                            "command": "openstack --os-cloud {{ cloud_config_name }} stack create -t {{ template_path }} {{ app_name }}"})
+
+        # dump task create
+        create_path = os.path.join(self.output_dir, 'roles', 'create_app', 'tasks', 'main.yml')
+        create_file = open(create_path, 'w')
+        yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True)
 

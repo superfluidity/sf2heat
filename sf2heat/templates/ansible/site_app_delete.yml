@@ -6,4 +6,4 @@
       - group_vars/all
 
   roles:
-    - delete_osm
+    - delete_app
