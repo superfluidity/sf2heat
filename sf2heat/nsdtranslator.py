@@ -22,7 +22,6 @@ class NSDTranslator(object):
         self.ansbile = ansible
         self.ansbile_vars = {
             "template_path": "/tmp/app_template.yaml",
-            # "config_path": "/tmp/app_config.yaml",
             "app_name": "test_app",
             "cloud_config_name": "cloud_config_name"
         }
@@ -209,7 +208,8 @@ class NSDTranslator(object):
 
     def _get_nova_flavor(self, name, vdu_data, vnf_data):
         resource_type = 'OS::Nova::Flavor'
-        resource_prop = {'flavorid': str(vnf_data['deploymentFlavour'][0]['flavourId']), 'name': str(name), 'is_public': False}
+        resource_prop = {'flavorid': str(vnf_data['deploymentFlavour'][0]['flavourId']), 'name': str(name),
+                         'is_public': False}
         # virtualMemory and virtualCpu properties
         if 'virtualComputeDesc' in vdu_data and vdu_data['virtualComputeDesc'] is not None:
             for vcd in vnf_data['virtualComputeDesc']:
@@ -237,13 +237,14 @@ class NSDTranslator(object):
 
     def _get_subnet(self, subnet_name, prop, vnf_data):
         resource_type = 'OS::Neutron::Subnet'
-        resource_prop = {'name': subnet_name, 'network': {'get_resource': str(prop['network'])}, 'cidr': str(prop['cidr'])}
+        resource_prop = {'name': subnet_name, 'network': {'get_resource': str(prop['network'])},
+                         'cidr': str(prop['cidr'])}
         new_hot_resource = HotResource(subnet_name, resource_type, resource_prop)
         return new_hot_resource
 
     def _get_neutron_net(self, name, vnf_data):
         resource_type = 'OS::Neutron::Net'
-        resource_prop = {'name':str(name)}
+        resource_prop = {'name': str(name)}
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
 
