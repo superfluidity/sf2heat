@@ -12,5 +12,5 @@ class HotResource(object):
     """
     def __init__(self, name, type, properties):
         #self.name = name
-        self.type = type
+        self.type = str(type)
         self.properties = properties or {}
