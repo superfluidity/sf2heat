@@ -9,7 +9,9 @@ from hotsyntax.hot_resource import HotResource
 logging.basicConfig(level=logging.DEBUG)
 log = logging.getLogger('NSDTranslator')
 
-TEMPLATE_ANSIBLE_PATH = 'sf2heat/templates/ansible'
+TEMPLATE_ANSIBLE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'templates/ansible')
+
+
 
 
 class NSDTranslator(object):
@@ -296,42 +298,52 @@ class NSDTranslator(object):
             os.makedirs(directory)
 
     def _write_ansible_playbook(self, hot):
-        log.debug('Write Ansible playbook to %s', self.output_dir)
-        create_task = [
-            {"name": "Copy heat template",
-             "template": {"src": "stack.j2", "dst": "{{ template_path }}"}}
-        ]
+        try:
+            # log.debug(os.path.abspath(__file__))
+            log.debug(TEMPLATE_ANSIBLE_PATH)
+            log.debug('Write Ansible playbook to %s', self.output_dir)
+            create_task = [
+                {"name": "Copy heat template",
+                 "template": {"src": "stack.j2", "dst": "{{ template_path }}"}}
+            ]
 
-        # copy playbook dir tree
-        shutil.rmtree(self.output_dir, ignore_errors=True)
-        shutil.copytree(TEMPLATE_ANSIBLE_PATH, self.output_dir)
+            # copy playbook dir tree
+            shutil.rmtree(self.output_dir, ignore_errors=True)
+            #self.makedir_p(self.output_dir)
+            shutil.copytree(TEMPLATE_ANSIBLE_PATH, self.output_dir)
 
-        # dump heat template in create_app/templates
-        heat_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', 'stack.j2')
-        dstfile = open(heat_path, 'w')
-        self.hot_template.export_yaml(dstfile)
+            self.makedir_p(os.path.join(self.output_dir, 'roles', 'create_app', 'templates'))
 
-        # dump each config script
-        for conf in self.ansbile_configs:
-            print conf
-            conf_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', conf['name'])
-            conf_file = open(conf_path, 'w')
-            conf_file.write(self.nsd_descriptors['resource'][conf['name']])
-            conf_file.close()
-            create_task.append({"name": "Copy config template",
-                                "template": {"src": str(conf['name']),
-                                             "dst": "{{ " + conf['var_name'] + " }}"}})
+            # dump heat template in create_app/templates
+            heat_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', 'stack.j2')
+            dstfile = open(heat_path, 'w')
+            self.hot_template.export_yaml(dstfile)
 
-        # dump variables ansbile_vars
-        vars_path = os.path.join(self.output_dir, 'group_vars', 'all.yml')
-        vars_file = open(vars_path, 'w')
-        yaml.dump(self.ansbile_vars, vars_file, default_flow_style=False, explicit_start=True)
+            # dump each config script
+            for conf in self.ansbile_configs:
+                print conf
+                conf_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', conf['name']+'.j2')
+                print conf_path
+                conf_file = open(conf_path, 'w')
+                conf_file.write(self.nsd_descriptors['resource'][conf['name']])
+                conf_file.close()
+                create_task.append({"name": "Copy config template",
+                                    "template": {"src": str(conf['name']),
+                                                 "dst": "{{ " + conf['var_name'] + " }}"}})
 
-        create_task.append({"name": "Create new stack",
-                            "command": "openstack --os-cloud {{ cloud_config_name }} stack create -t {{ template_path }} {{ app_name }}"})
+            # dump variables ansbile_vars
+            vars_path = os.path.join(self.output_dir, 'group_vars', 'all.yml')
+            vars_file = open(vars_path, 'w')
+            yaml.dump(self.ansbile_vars, vars_file, default_flow_style=False, explicit_start=True)
 
-        # dump task create
-        create_path = os.path.join(self.output_dir, 'roles', 'create_app', 'tasks', 'main.yml')
-        create_file = open(create_path, 'w')
+            create_task.append({"name": "Create new stack",
+                                "command": "openstack --os-cloud {{ cloud_config_name }} stack create -t {{ template_path }} {{ app_name }}"})
 
-        yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True)
+            # dump task create
+            create_path = os.path.join(self.output_dir, 'roles', 'create_app', 'tasks', 'main.yml')
+            create_file = open(create_path, 'w')
+
+            yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True)
+        except Exception as e:
+            log.exception(e)
+
