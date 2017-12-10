@@ -321,17 +321,16 @@ class NSDTranslator(object):
 
             # dump each config script
             for conf in self.ansbile_configs:
-                print conf
                 conf_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', conf['name']+'.j2')
-                print conf_path
                 conf_file = open(conf_path, 'w')
                 conf_file.write(self.nsd_descriptors['resource'][conf['name']])
                 conf_file.close()
                 create_task.append({"name": "Copy config template",
-                                    "template": {"src": str(conf['name']),
+                                    "template": {"src": str(conf['name'])+'.j2',
                                                  "dst": "{{ " + conf['var_name'] + " }}"}})
 
             # dump variables ansbile_vars
+            self.makedir_p(os.path.join(self.output_dir, 'group_vars'))
             vars_path = os.path.join(self.output_dir, 'group_vars', 'all.yml')
             vars_file = open(vars_path, 'w')
             yaml.dump(self.ansbile_vars, vars_file, default_flow_style=False, explicit_start=True)
