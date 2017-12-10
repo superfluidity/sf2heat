@@ -26,6 +26,14 @@ class HotTemplate(object):
     def set_description(self, description):
         self.description = str(description)
 
-    def yaml(self):
-        return yaml.dump(self.__dict__, None, encoding='utf-8', allow_unicode=False)
+    def export_yaml(self, dstfile):
+        str_json = self.toJSON()
+        yaml.safe_dump(json.loads(str_json), dstfile, default_flow_style=False)
 
+    def toYaml(self):
+        str_json = self.toJSON()
+        return yaml.safe_dump(json.loads(str_json), default_flow_style=False)
+
+    def toJSON(self):
+        return json.dumps(self, default=lambda o: o.__dict__,
+                          sort_keys=True, indent=4)

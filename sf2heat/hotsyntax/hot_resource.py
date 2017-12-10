@@ -14,3 +14,6 @@ class HotResource(object):
         #self.name = name
         self.type = str(type)
         self.properties = properties or {}
+
+    def yaml(self):
+        return yaml.dump(self.__dict__, None, encoding='utf-8', allow_unicode=False)

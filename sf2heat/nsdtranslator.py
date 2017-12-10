@@ -37,9 +37,9 @@ class NSDTranslator(object):
                 self._write_ansible_playbook(self.hot_template)
             else:
                 dstfile = open(self.output_dir, 'w') if isinstance(self.output_dir, str) else self.output_dir
-                yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
+                self.hot_template.export_yaml(dstfile)
         else:
-            print yaml.dump(self.hot_template, default_flow_style=False, explicit_start=True)
+            print self.hot_template.toYaml()
 
     def _translate_vnf(self, vnf_data):
         log.debug('_translate_vnf id: ' + vnf_data['vnfdId'])
@@ -267,7 +267,7 @@ class NSDTranslator(object):
                             meta_prop = dict(pair for d in prop[element_id] for pair in d.items())
                             return meta_prop
                         else:
-                            return {meta_name: prop[element_id]}
+                            return {meta_name: str(prop[element_id])}
         return {}
 
     @staticmethod
@@ -309,7 +309,7 @@ class NSDTranslator(object):
         # dump heat template in create_app/templates
         heat_path = os.path.join(self.output_dir, 'roles', 'create_app', 'templates', 'stack.j2')
         dstfile = open(heat_path, 'w')
-        yaml.dump(self.hot_template, dstfile, default_flow_style=False, explicit_start=True)
+        self.hot_template.export_yaml(dstfile)
 
         # dump each config script
         for conf in self.ansbile_configs:
@@ -333,4 +333,5 @@ class NSDTranslator(object):
         # dump task create
         create_path = os.path.join(self.output_dir, 'roles', 'create_app', 'tasks', 'main.yml')
         create_file = open(create_path, 'w')
+
         yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True)
