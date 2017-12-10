@@ -24,9 +24,24 @@ Install from source code:
 Install with pip:
 
     pip install -e https://github.com/superfluidity/sfehat.git#egg=sf2heat
+    
+## Usage example lib
 
-## Documentation
+    from sf2heat.nsdtranslator import NSDTranslator
+    # with ansible playbook
+    nsd_translator = NSDTranslator(ns_data, hot_path, True)
+    nsd_translator.translate()
+    
+    # without ansible playbook
+    nsd_translator = NSDTranslator(ns_data, hot_path)
+    nsd_translator.translate()
+    
 
+## Usage example from CLI
+### From Superfluidity descriptor to HEAT
+    python sf2heat/cli.py -i tests/test_project_2.json -o /tmp/heat_output.yaml
+### From Superfluidity descriptor to HEAT with Ansible Playbook
+    python sf2heat/cli.py -i tests/test_project_2.json -d /tmp/heat_with_playbook -a
 
 ## Project Info
 * License: Apache License, Version 2.0
