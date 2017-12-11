@@ -23,7 +23,7 @@ Install from source code:
 
 Install with pip:
 
-    pip install -e https://github.com/superfluidity/sfehat.git#egg=sf2heat
+    pip install -e git+https://github.com/superfluidity/sfehat.git#egg=sf2heat
     
 ## Usage example lib
 
