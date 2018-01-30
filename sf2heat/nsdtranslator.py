@@ -17,15 +17,15 @@ TEMPLATE_ANSIBLE_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)),
 class NSDTranslator(object):
     """ Invokes translation methods. """
 
-    def __init__(self, nsd_data, output_dir=None, ansible=False):
+    def __init__(self, nsd_data, output_dir=None, ansible=None):
         super(NSDTranslator, self).__init__()
         self.nsd_descriptors = nsd_data
         self.output_dir = output_dir
         self.ansbile = ansible
         self.ansbile_vars = {
             "template_path": "/tmp/app_template.yaml",
-            "app_name": "test_app",
-            "cloud_config_name": "cloud_config_name"
+            "app_name": ansible["app_name"] if "app_name" in ansible else "test_app",
+            "cloud_config_name": ansible["cloud_config_name"] if "cloud_config_name" in ansible else "cloud_config_name"
         }
         self.ansbile_configs = []
         self.hot_template = HotTemplate()
@@ -104,7 +104,7 @@ class NSDTranslator(object):
             user_data_ref = self._get_properties_from_vdu_add_prop('user_data', vdu_data)
             if user_data_ref:
                 # "config_path": "/tmp/app_config.yaml"
-                config_path = "/tmp/" + user_data_ref
+                config_path = "/tmp/" + user_data_ref + ".yaml"
                 var_name = 'config_path_' + str(len(self.ansbile_configs))
                 self.ansbile_vars[var_name] = str(config_path)
                 self.ansbile_configs.append({"name": str(user_data_ref), "var_name": str(var_name)})

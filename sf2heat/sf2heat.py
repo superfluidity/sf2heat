@@ -35,9 +35,11 @@ class Sf2heat:
         log.debug("Starts translation process...")
         if self.ansible_init:
             dest_dir = self.output_directory
+            nsd_translator = NSDTranslator(self.input_data, dest_dir, {"app_name": 'app_name', "cloud_config_name": 'app_name'})
         else:
             dest_dir = self.output_file
-        nsd_translator = NSDTranslator(self.input_data, dest_dir, self.ansible_init)
+            nsd_translator = NSDTranslator(self.input_data, dest_dir)
+
         nsd_translator.translate()
         return
 
