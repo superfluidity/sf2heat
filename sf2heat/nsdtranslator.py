@@ -24,8 +24,8 @@ class NSDTranslator(object):
         self.ansbile = ansible
         self.ansbile_vars = {
             "template_path": "/tmp/app_template.yaml",
-            "app_name": ansible["app_name"] if "app_name" in ansible else "test_app",
-            "cloud_config_name": ansible["cloud_config_name"] if "cloud_config_name" in ansible else "cloud_config_name"
+            "app_name": str(ansible["app_name"]) if "app_name" in ansible else "test_app",
+            "cloud_config_name": str(ansible["cloud_config_name"]) if "cloud_config_name" in ansible else "cloud_config_name"
         }
         self.ansbile_configs = []
         self.hot_template = HotTemplate()
