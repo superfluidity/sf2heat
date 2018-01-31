@@ -191,16 +191,31 @@ class NSDTranslator(object):
                 if 'l2AddressData' in addr:
                     resource_prop['mac_address'] = str(addr['l2AddressData'])
                 if 'l3AddressData' in addr and addr['l3AddressData']['floatingIpActivated']:
-                    float_name = name + "_floating_ip"
-                    neutron_floating_ip = self._get_floating_ip(float_name, intcpd, vnf_data)
-                    self.hot_template.add_resource(float_name, neutron_floating_ip)
+                    if 'association' in addr['l3AddressData'] and addr['l3AddressData']['association']:
+                        float_name = name + "_floating_ip_association"
+                        neutron_floating_ip = self._get_floating_ip_association(float_name, intcpd, vnf_data)
+                        self.hot_template.add_resource(float_name, neutron_floating_ip)
+                    else:
+                        float_name = name + "_floating_ip"
+                        neutron_floating_ip = self._get_floating_ip(float_name, intcpd, vnf_data)
+                        self.hot_template.add_resource(float_name, neutron_floating_ip)
 
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
 
+    def _get_floating_ip_association(self, float_name, intcpd, vnf_data):
+        resource_type = 'OS::Neutron::FloatingIPAssociation'
+        resource_prop = {'port_id': {'get_resource': 'port_' + str(intcpd['cpdId']) }}
+        meta_float_ip = self._get_properties_from_metadata(intcpd['cpdId'], 'CPIPv4FloatingIP', vnf_data)
+        resource_prop.update({'floatingip_id': str(meta_float_ip['CPIPv4FloatingIP'])})
+        meta_prop = self._get_properties_from_metadata(intcpd['cpdId'], 'properties', vnf_data)
+        resource_prop.update(meta_prop)
+        new_hot_resource = HotResource(float_name, resource_type, resource_prop)
+        return new_hot_resource
+
     def _get_floating_ip(self, float_name, intcpd, vnf_data):
         resource_type = 'OS::Nova::FloatingIP'
-        resource_prop = {'port_id': {'get_resource': str(intcpd['cpdId'])}}
+        resource_prop = {'port_id': {'get_resource':  'port_' + str(intcpd['cpdId'])}}
         meta_float_ip = self._get_properties_from_metadata(intcpd['cpdId'], 'CPIPv4FloatingIP', vnf_data)
         resource_prop.update({'floating_ip_address': str(meta_float_ip['CPIPv4FloatingIP'])})
         meta_prop = self._get_properties_from_metadata(intcpd['cpdId'], 'properties', vnf_data)
