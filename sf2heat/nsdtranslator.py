@@ -167,7 +167,8 @@ class NSDTranslator(object):
         else:
             neutron_elem = self._get_neutron_net(network_name, vnf_data)
         self.hot_template.add_resource(network_name, neutron_elem)
-        resource_prop['network'] = {'get_resource': str(network_name)}
+
+
         metadata_list = vnf_data['modifiableAttributes']['metadata']
         for metadata in metadata_list:
             if 'CPIPv4FixedIP' in metadata:
@@ -199,7 +200,10 @@ class NSDTranslator(object):
                         float_name = name + "_floating_ip"
                         neutron_floating_ip = self._get_floating_ip(float_name, intcpd, vnf_data)
                         self.hot_template.add_resource(float_name, neutron_floating_ip)
-
+        if 'network' in resource_prop:
+            resource_prop['network']['get_resource'] = str(network_name)
+        else:
+            resource_prop['network'] = {'get_resource': str(network_name)}
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
 
