@@ -319,7 +319,7 @@ class NSDTranslator(object):
             log.debug('Write Ansible playbook to %s', self.output_dir)
             create_task = [
                 {"name": "Copy heat template",
-                 "template": {"src": "stack.j2", "dst": "{{ template_path }}"}}
+                 "template": {"src": "stack.j2", "dest": "{{ template_path }}"}}
             ]
 
             # copy playbook dir tree
