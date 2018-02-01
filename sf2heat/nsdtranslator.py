@@ -348,7 +348,7 @@ class NSDTranslator(object):
             self.makedir_p(os.path.join(self.output_dir, 'group_vars'))
             vars_path = os.path.join(self.output_dir, 'group_vars', 'all.yml')
             vars_file = open(vars_path, 'w')
-            yaml.dump(self.ansbile_vars, vars_file, default_flow_style=False, explicit_start=True)
+            yaml.dump(self.ansbile_vars, vars_file, default_flow_style=False, explicit_start=True, width=float("inf"))
 
             create_task.append({"name": "Create new stack",
                                 "command": "openstack --os-cloud {{ cloud_config_name }} stack create -t {{ template_path }} {{ app_name }}"})
