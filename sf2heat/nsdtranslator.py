@@ -247,7 +247,7 @@ class NSDTranslator(object):
         resource_prop = {'name': str(name)}
         for prop in vdu_data['configurableProperties']['additionalVnfcConfigurableProperty']:
             if 'SSHPubKey' in prop:
-                resource_prop['public_key'] = str(prop['SSHPubKey'])
+                resource_prop['public_key'] = prop['SSHPubKey']
                 break
         new_hot_resource = HotResource(name, resource_type, resource_prop)
         return new_hot_resource
