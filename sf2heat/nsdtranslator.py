@@ -342,7 +342,7 @@ class NSDTranslator(object):
                 conf_file.close()
                 create_task.append({"name": "Copy config template",
                                     "template": {"src": str(conf['name'])+'.j2',
-                                                 "dst": "{{ " + conf['var_name'] + " }}"}})
+                                                 "dest": "{{ " + conf['var_name'] + " }}"}})
 
             # dump variables ansbile_vars
             self.makedir_p(os.path.join(self.output_dir, 'group_vars'))
