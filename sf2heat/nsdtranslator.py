@@ -111,10 +111,17 @@ class NSDTranslator(object):
                 result['user_data'] = {"get_file": str(config_path)}
             result['user_data_format'] = "RAW"
             # OS::Nova::Flavor
-            flavor_name = 'flavor_' + vdu_data['vduId']
-            result['flavor'] = {'get_resource': str(flavor_name)}
-            flavor_res = self._get_nova_flavor(flavor_name, vdu_data, vnf_data)
-            self.hot_template.add_resource(flavor_name, flavor_res)
+
+            flavor_id = str(vnf_data['deploymentFlavour'][0]['flavourId'])
+            flav_to_create = self._get_properties_from_metadata(flavor_id, "createVIMFlavor", vnf_data)
+            print flav_to_create
+            if flav_to_create:
+                flavor_name = 'flavor_' + vdu_data['vduId']
+                result['flavor'] = {'get_resource': str(flavor_name)}
+                flavor_res = self._get_nova_flavor(flavor_name, vdu_data, vnf_data)
+                self.hot_template.add_resource(flavor_name, flavor_res)
+            else:
+                result['flavor'] = flavor_id
             #  OS::Nova::KeyPair
             key_pair_name = 'key_' + vdu_data['vduId']
             result['key_name'] = {'get_resource': str(key_pair_name)}
