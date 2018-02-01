@@ -78,6 +78,8 @@ class NSDTranslator(object):
                             subnet_name = 'subnet_' + intVl['virtualLinkDescId'] + '_' + str(k)
                             sub_pro = {'cidr': str(cidr['cidr']), 'network': str(intVl['virtualLinkDescId']),
                                        'dns_nameservers': cidr['dns_nameservers']}
+                            print sub_pro
+                            print cidr['dns_nameservers']
                             neutron_subnet = self._get_subnet(subnet_name, sub_pro, vnf_data)
                             self.hot_template.add_resource(subnet_name, neutron_subnet)
 
