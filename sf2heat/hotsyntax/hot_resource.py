@@ -10,7 +10,7 @@ class HotResource(object):
     """ Representation of a Resource in HOT template
         for the purpose we consider just some fields
     """
-    def __init__(self, name, type, properties, depends_on):
+    def __init__(self, name, type, properties, depends_on=None):
         #self.name = name
         self.type = str(type)
         self.properties = properties or {}
