@@ -357,7 +357,7 @@ class NSDTranslator(object):
             create_path = os.path.join(self.output_dir, 'roles', 'create_app', 'tasks', 'main.yml')
             create_file = open(create_path, 'w')
 
-            yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True)
+            yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True, width=float("inf"))
         except Exception as e:
             log.exception(e)
 
