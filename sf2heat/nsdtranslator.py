@@ -222,7 +222,7 @@ class NSDTranslator(object):
         resource_prop.update({'floatingip_id': str(meta_float_ip['CPIPv4FloatingIP'])})
         meta_prop = self._get_properties_from_metadata(intcpd['cpdId'], 'properties', vnf_data)
         resource_prop.update(meta_prop)
-        new_hot_resource = HotResource(float_name, resource_type, resource_prop)
+        new_hot_resource = HotResource(float_name, resource_type, resource_prop, 'interf_' + intcpd['cpdId'])
         return new_hot_resource
 
     def _get_floating_ip(self, float_name, intcpd, vnf_data):
