@@ -115,7 +115,7 @@ class NSDTranslator(object):
             flavor_id = str(vnf_data['deploymentFlavour'][0]['flavourId'])
             flav_to_create = self._get_properties_from_metadata(flavor_id, "createVIMFlavor", vnf_data)
             print flav_to_create
-            if flav_to_create:
+            if 'createVIMFlavor' in flav_to_create and flav_to_create['createVIMFlavor'] is True:
                 flavor_name = 'flavor_' + vdu_data['vduId']
                 result['flavor'] = {'get_resource': str(flavor_name)}
                 flavor_res = self._get_nova_flavor(flavor_name, vdu_data, vnf_data)
