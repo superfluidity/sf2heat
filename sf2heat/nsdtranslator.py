@@ -151,7 +151,7 @@ class NSDTranslator(object):
         neutron_port_name = 'port_' + intcpd['cpdId']
         neutron_port_res = self._get_neutron_port(intcpd, vnf_data)
         self.hot_template.add_resource(neutron_port_name, neutron_port_res)
-        resource_prop['port'] = {'get_port': str(neutron_port_name)}
+        resource_prop['port'] = {'get_resource': str(neutron_port_name)}
         new_hot_resource = HotResource('interf_' + router_id, resource_type, resource_prop)
         return new_hot_resource
 
@@ -179,7 +179,7 @@ class NSDTranslator(object):
                         resource_prop['fixed_ips'].append({'ip_address': str(fixed_ip[name])})
                         # print "SUBNET for cpid:", name, network_name
                         subnet_name = 'subnet_' + name + '_' + str(index)
-                        # neutron_subnet = self._get_port_subnet(subnet_name, intcpd, vnf_data)
+                        # neutron_subnet = self._get_resource_subnet(subnet_name, intcpd, vnf_data)
                         # self.hot_template.add_resource(subnet_name, neutron_subnet)
             if 'properties' in metadata:
                 for prop in metadata['properties']:
@@ -214,7 +214,7 @@ class NSDTranslator(object):
         return new_hot_resource
 
     def _get_floating_ip(self, float_name, intcpd, vnf_data):
-        resource_type = 'OS::Nova::FloatingIP'
+        resource_type = 'OS::Neutron::FloatingIP'
         resource_prop = {'port_id': {'get_resource':  'port_' + str(intcpd['cpdId'])}}
         meta_float_ip = self._get_properties_from_metadata(intcpd['cpdId'], 'CPIPv4FloatingIP', vnf_data)
         resource_prop.update({'floating_ip_address': str(meta_float_ip['CPIPv4FloatingIP'])})
