@@ -28,11 +28,11 @@ class HotTemplate(object):
 
     def export_yaml(self, dstfile):
         str_json = self.toJSON()
-        yaml.safe_dump(json.loads(str_json), dstfile, default_flow_style=False)
+        yaml.safe_dump(json.loads(str_json), dstfile, default_flow_style=False,width=float("inf"))
 
     def toYaml(self):
         str_json = self.toJSON()
-        return yaml.safe_dump(json.loads(str_json), default_flow_style=False)
+        return yaml.safe_dump(json.loads(str_json), default_flow_style=False,width=float("inf"))
 
     def toJSON(self):
         return json.dumps(self, default=lambda o: o.__dict__,
