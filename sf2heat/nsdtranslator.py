@@ -79,8 +79,9 @@ class NSDTranslator(object):
                     if intVl['virtualLinkDescId'] in prop:
                         for k, cidr in enumerate(prop[intVl['virtualLinkDescId']]):
                             subnet_name = 'subnet_' + intVl['virtualLinkDescId'] + '_' + str(k)
-                            sub_pro = {'cidr': str(cidr['cidr']), 'network': str(intVl['virtualLinkDescId']),
-                                       'dns_nameservers': cidr['dns_nameservers']}
+                            sub_pro = {'cidr': str(cidr['cidr']), 'network': str(intVl['virtualLinkDescId'])}
+                            if 'dns_nameservers' in cidr:
+                                sub_pro['dns_nameservers'] = cidr['dns_nameservers']
                             #print sub_pro
                             #print cidr['dns_nameservers']
                             neutron_subnet = self._get_subnet(subnet_name, sub_pro, vnf_data)
