@@ -272,7 +272,9 @@ class NSDTranslator(object):
     def _get_subnet(self, subnet_name, prop, vnf_data):
         resource_type = 'OS::Neutron::Subnet'
         resource_prop = {'name': subnet_name, 'network': {'get_resource': str(prop['network'])},
-                         'cidr': str(prop['cidr']), 'dns_nameservers': prop['dns_nameservers']}
+                         'cidr': str(prop['cidr']) }
+        if 'dns_nameservers' in prop:
+            resource_prop['dns_nameservers'] = prop['dns_nameservers']
         new_hot_resource = HotResource(subnet_name, resource_type, resource_prop)
         return new_hot_resource
 
