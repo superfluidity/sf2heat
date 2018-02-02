@@ -26,6 +26,17 @@ class HotTemplate(object):
     def set_description(self, description):
         self.description = str(description)
 
+    def get_resource(self, res_id):
+        return self.resources[res_id]
+
+    def get_resources_by_type(self, res_type):
+        result = {}
+        for r in self.resources:
+            log.debug(self.resources[r].get_type())
+            if self.resources[r].get_type() == res_type:
+                result[r] = self.resources[r]
+        return result
+
     def export_yaml(self, dstfile):
         str_json = self.toJSON()
         yaml.safe_dump(json.loads(str_json), dstfile, default_flow_style=False,width=float("inf"))

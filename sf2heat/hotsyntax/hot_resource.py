@@ -17,5 +17,11 @@ class HotResource(object):
         if depends_on:
             self.depends_on = depends_on
 
+    def get_type(self):
+        return self.type
+
+    def set_depends_on(self, depends_on):
+        self.depends_on = depends_on
+
     def yaml(self):
         return yaml.dump(self.__dict__, None, encoding='utf-8', allow_unicode=False, width=float("inf"))

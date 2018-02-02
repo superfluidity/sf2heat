@@ -32,8 +32,11 @@ class NSDTranslator(object):
         log.debug('Initialized NSDTranslator')
 
     def translate(self):
+
         for vnfd_id in self.nsd_descriptors['vnfd']:
             self._translate_vnf(self.nsd_descriptors['vnfd'][vnfd_id])
+        log.debug('set_depends_on')
+        self.set_depends_on()
         if self.output_dir is not None:
             if self.ansbile:
                 self._write_ansible_playbook(self.hot_template)
@@ -224,7 +227,7 @@ class NSDTranslator(object):
         resource_prop.update({'floatingip_id': str(meta_float_ip['CPIPv4FloatingIP'])})
         meta_prop = self._get_properties_from_metadata(intcpd['cpdId'], 'properties', vnf_data)
         resource_prop.update(meta_prop)
-        new_hot_resource = HotResource(float_name, resource_type, resource_prop, 'interf_' + intcpd['cpdId'])
+        new_hot_resource = HotResource(float_name, resource_type, resource_prop, depends_on)
         return new_hot_resource
 
     def _get_floating_ip(self, float_name, intcpd, vnf_data):
@@ -374,4 +377,13 @@ class NSDTranslator(object):
             yaml.dump(create_task, create_file, default_flow_style=False, explicit_start=True, width=float("inf"))
         except Exception as e:
             log.exception(e)
+
+    def set_depends_on(self):
+        # setup depends_on filed on OS::Neutron::FloatingIPAssociation
+        float_ip_ass = self.hot_template.get_resources_by_type("OS::Neutron::FloatingIPAssociation")
+        #float_ip_ass = self.hot_template.get_resources_by_type("OS::Nova::Server")
+        rints = self.hot_template.get_resources_by_type("OS::Neutron::RouterInterface")
+        depends_on_rints = list(rints.keys())
+        for fip in float_ip_ass:
+            self.hot_template.get_resource(fip).set_depends_on(depends_on_rints)
 
